@@ -2,12 +2,22 @@
 #include <tchar.h>
 
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+// WndProc이라는 이름은 정해진것이 아니다 맘대로 써도된다.
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM iParam);
+
 HINSTANCE g_hInst;
 LPCWSTR lpszClass = L"ApiBase";
 
+// 윈도우 프로그램의 시작점
+// hInstance는 지금 실행되고 있는 프로그램의 인스턴스 핸들, 두번째는 바로 앞에 실행된 핸들 통상 NULL, 명령행인자, 윈도우를 보여주는 형태의 플래그
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
-
+	/*
+	1. 윈도우 클래스를 만든다.
+	2. 윈도우 객체를 생성한다.
+	3. 윈도우를 화면에 보여준다.
+	4. 입력장치로부터 입력신호를 받는다(메시지 루프를 돈다)
+	WndProc에서 작업을 처리한다
+	*/
 
 	HWND hWnd;
 	MSG Message;
