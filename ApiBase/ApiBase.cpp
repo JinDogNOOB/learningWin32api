@@ -19,6 +19,82 @@ DrawData g_pos_list[MAX_COUNT];
 int g_pos_count = 0;
 
 
+
+// 그때마다 DC를 불러오고 릴리즈 DC 하는게 조금 그렇다 실수할수도 있고 , 그 부분을 클래스화시킬수있다.
+// 이렇게 MFC...?의 대부분이 ㄹ이렇게 구성되있나..
+// MFC는 다음과 같은 Wrapper클래스들의 묶음,,, 마소가 다 작업을 해놨다
+
+// 상속이 가능하게 하자
+class DC {
+protected:
+	HDC mh_dc;
+	HWND mh_wnd;
+
+public:
+
+	// 생성자
+	DC(HWND ah_wnd) {
+		// 사용자가 준 행들을 가지고 DC를 얻는다.
+		mh_wnd = ah_wnd;
+	}
+	// 여기 이 기반에 소멸자 업캐스팅이나 오버라이딩이 있을것같으면 virtual 껴놓자
+	virtual ~DC() {
+	}
+
+	HGDIOBJ SelectObject(HGDIOBJ ah_gdiobj) {
+		// :: 그냥 써주면 전역함수를 의미한다. 여기 이 클래스의 멤버함수가 아닌 전역함수
+		return ::SelectObject(mh_dc, ah_gdiobj);
+	}
+
+	void Rectangle(int sx, int sy, int ex, int ey) {
+		::Rectangle(mh_dc, sx, sy, ex, ey);
+	}
+	void Ellipse(int sx, int sy, int ex, int ey) {
+		::Ellipse(mh_dc, sx, sy, ex, ey);
+	}
+};
+
+
+class CClientDC : public DC {
+public:
+	// 생성자
+	CClientDC(HWND ah_wnd) : DC(ah_wnd){
+		// 사용자가 준 행들을 가지고 DC를 얻는다.
+		mh_dc = GetDC(ah_wnd);
+	}
+	// 소멸자
+	~CClientDC() {
+		ReleaseDC(mh_wnd, mh_dc);
+	}
+};
+
+class CPaintDC : public DC {
+protected:
+	PAINTSTRUCT m_ps;
+public:
+	CPaintDC(HWND ah_wnd) : DC(ah_wnd) {
+		mh_dc = BeginPaint(mh_wnd, &m_ps);
+	}
+
+	~CPaintDC() {
+		EndPaint(mh_wnd, &m_ps);
+	}
+};
+
+
+
+/*
+CClientDC dc(hWnd);
+dc.SelectObject(pen);
+dc.Ellipse();
+
+
+*/
+
+
+
+
+
 // 윈도우 프로그램의 시작점
 // hInstance는 지금 실행되고 있는 프로그램의 인스턴스 핸들, 두번째는 바로 앞에 실행된 핸들 통상 NULL, 명령행인자, 윈도우를 보여주는 형태의 플래그
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow) {
@@ -138,3 +214,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
+
+
+
+
+
+
